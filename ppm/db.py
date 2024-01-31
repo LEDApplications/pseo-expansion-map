@@ -17,7 +17,7 @@ def insert_csv_into_db(csv_file_path: str, db_path: str, table_name: str, vintag
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
 
-    with open(csv_file_path, "r") as csv_file:
+    with open(csv_file_path, "r", encoding="utf-8") as csv_file:
         reader = csv.reader(csv_file)
         header_row = next(reader)
         header = ["vintage"] + header_row
@@ -35,15 +35,27 @@ def insert_csv_into_db(csv_file_path: str, db_path: str, table_name: str, vintag
 
 
 def get_header_row(csv_file_path: str):
-    with open(csv_file_path, "r") as csv_file:
+    with open(csv_file_path, "r", encoding="utf-8") as csv_file:
         reader = csv.reader(csv_file)
         header_row = next(reader)
 
     return header_row
 
 
-def create_db_table_if_not_exists(db_path: str, table_name: str, columns: list):
-    """Create a sqlite db of with a single table and text columns
+def truncate_table(db_path: str, table_name: str):
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    cur.execute(f"DELETE FROM {table_name}")
+    conn.commit()
+    conn.close()
+    logger.debug(f"truncated table {table_name} in {db_path}")
+
+
+def init_db_table(db_path: str, table_name: str, columns: list):
+    """
+        Create a sqlite db of with a single table and text columns
+        if it already exists, truncate the table
+
 
     Args:
         db_path (str): path to the sqlite db
@@ -62,3 +74,4 @@ def create_db_table_if_not_exists(db_path: str, table_name: str, columns: list):
         logger.debug(f"created db at {db_path}")
     else:
         logger.debug(f"db at {db_path} already exists")
+        truncate_table(db_path, table_name)
