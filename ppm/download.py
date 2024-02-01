@@ -42,7 +42,7 @@ def download_url_to_file(url: str, target_dir: str, file_name: str = None):
         output_file = os.path.join(output_path, url_file_name)
 
     if not os.path.exists(output_file):
-        logger.info(f"downloading {os.path.basename(output_file)}")
+        logger.info(f"downloading file as {os.path.basename(output_file)}")
         r = requests.get(f"{url}", stream=True)
         with open(output_file, "wb") as f:
             for chunk in r.iter_content(chunk_size=128):

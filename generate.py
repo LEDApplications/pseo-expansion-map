@@ -39,6 +39,13 @@ def parse_args():
         type=log_level_type,
         choices=log_levels,
     )
+    parser.add_argument(
+        "-d",
+        "--database",
+        help="sqlite database location",
+        required=False,
+        type=str,
+    )
 
     return parser.parse_args()
 
@@ -59,10 +66,15 @@ def main():
         vintages,
     )
 
-    db_path = "./tmp/pseo.db"
     table_name = "pseoe_public"
+
     with tempfile.TemporaryDirectory() as temp_dir:
         # You can use 'temp_dir' here. It will be automatically deleted when the 'with' block ends.
+
+        if inputs.database:
+            db_path = inputs.database
+        else:
+            db_path = f"{temp_dir}/pseo.db"
 
         logger.debug(f"temp directory path is {temp_dir}")
 
