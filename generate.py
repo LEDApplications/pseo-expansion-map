@@ -303,6 +303,24 @@ def main():
             """
         execute_sql(db_path, sql)
 
+        logger.info("adding crosswalk ids")
+        # add opeid to ipeds_count
+        sql = """
+            --sql
+            alter table ipeds_count
+                add column unitid text;
+            """
+        execute_sql(db_path, sql)
+
+        sql = """
+            --sql
+            update ipeds_count
+            set unitid = xwalk.unitid
+            from xwalk
+            where ipeds_count.institution = xwalk.OPEID;
+            """
+        execute_sql(db_path, sql)
+
     logger.info("done.")
 
 
