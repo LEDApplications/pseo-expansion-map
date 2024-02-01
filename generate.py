@@ -70,20 +70,19 @@ def main():
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # You can use 'temp_dir' here. It will be automatically deleted when the 'with' block ends.
+        logger.debug(f"temp directory path is {temp_dir}")
 
         if inputs.database:
             db_path = inputs.database
         else:
             db_path = f"{temp_dir}/pseo.db"
 
-        logger.debug(f"temp directory path is {temp_dir}")
+        logger.info("downloading and extracting")
 
         # download and extract all the csv files
         # since we'll need to unify the columns since they change over time
         csv_vintage_list = []
         for url, vintage in url_vintage_list:
-            logger.info(f"loading {vintage} data")
-
             destination_file_name = f"pseoe_all_{vintage}.csv.gz"
             csv_gz = download_url_to_file(url, temp_dir, destination_file_name)
             csv = ungz(csv_gz)
@@ -99,8 +98,9 @@ def main():
         header_row = ["vintage"] + list(unified_header)
         init_db_table(db_path, table_name, header_row)
 
+        logger.info(f"loading sqlite database")
         for csv, vintage in csv_vintage_list:
-            logger.info(f"inserting {vintage} into {db_path}")
+            logger.debug(f"inserting {vintage} into {db_path}")
             insert_csv_into_db(csv, db_path, table_name, vintage)
 
     logger.info("done.")
