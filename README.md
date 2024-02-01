@@ -14,4 +14,10 @@ Generate the data for the [Partners Map](https://observablehq.com/@jodyhoonstarr
 
 ## School Locations
 
-The institution names and locations are taken from [NCES](https://nces.ed.gov/programs/edge/geographic/schoollocations) and saved as a csv to the `data/` directory in this repo. 
+The institution names and locations are taken from [NCES](https://nces.ed.gov/programs/edge/geographic/schoollocations) and saved as a csv to the `data/` directory in this repo.
+
+## Crosswalk
+
+The pseo data uses the opeid while the school locations use a unit id. Some crosswalks are available [here](https://collegescorecard.ed.gov/data/) which are stored in the `data/` directory.
+
+> No effort has gone into syncing data vintages or doing cleanup on 3rd party sources.

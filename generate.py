@@ -12,7 +12,12 @@ from ppm.log import (
 )
 from ppm.download import get_links_in_table, download_url_to_file
 from ppm.zip import ungz
-from ppm.db import get_header_row, init_db_table, insert_csv_into_db_w_vintage
+from ppm.db import (
+    get_header_row,
+    init_db_table,
+    insert_csv_into_db_w_vintage,
+    insert_csv_into_db,
+)
 from ppm.sql import execute_sql
 
 logger = logging.getLogger(__name__)
@@ -21,6 +26,8 @@ PSEO_PUBLICATION_URL = "https://lehd.ces.census.gov/data/pseo/"
 ALL_FILE_URL_FORMAT = (
     "https://lehd.ces.census.gov/data/pseo/VINTAGE/all/pseoe_all.csv.gz"
 )
+EDGE_GEOCODE_CSV = "./data/EDGE_GEOCODE_POSTSECSCH_2223.csv"
+CROSSWALK_CSV = "./data/xwalks_opeid_ipeds_2020.csv"
 
 
 def parse_args():
@@ -267,6 +274,25 @@ def main():
 
         logger.info(f"executing sql process")
         execute_db_sql(db_path)
+
+        logger.info(f"loading geocode data into {db_path}")
+        header_row = get_header_row(EDGE_GEOCODE_CSV)
+        init_db_table(db_path, "edge_geocode", header_row)
+        insert_csv_into_db(EDGE_GEOCODE_CSV, db_path, "edge_geocode")
+
+        logger.info(f"loading opeid to unitid crosswalk into {db_path}")
+        header_row = get_header_row(CROSSWALK_CSV)
+        init_db_table(db_path, "xwalk", header_row)
+        insert_csv_into_db(CROSSWALK_CSV, db_path, "xwalk")
+
+        # 5 =  no match was made between the OPIED and an IPEDS UNITID
+        sql = """
+            --sql
+            DELETE
+            FROM xwalk
+            WHERE source = '5';
+            """
+        execute_sql(db_path, sql)
 
     logger.info("done.")
 
