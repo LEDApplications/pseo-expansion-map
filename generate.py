@@ -321,6 +321,82 @@ def main():
             """
         execute_sql(db_path, sql)
 
+        # delete any rows with no crosswalk entry
+        sql = """
+            --sql
+            delete
+            from ipeds_count
+            where unitid is null;
+            """
+        execute_sql(db_path, sql)
+
+        logger.info("joining geocode data")
+        sql = """
+            --sql
+            alter table ipeds_count
+                add column name text;
+            """
+        execute_sql(db_path, sql)
+
+        sql = """
+            --sql
+            alter table ipeds_count
+                add column st text;
+            """
+        execute_sql(db_path, sql)
+
+        sql = """
+            --sql
+            alter table ipeds_count
+                add column lat text;
+            """
+        execute_sql(db_path, sql)
+
+        sql = """
+            --sql
+            alter table ipeds_count
+                add column lon text;
+            """
+        execute_sql(db_path, sql)
+
+        sql = """
+            --sql
+            update ipeds_count
+                set name = g.NAME,
+                    st = g.STFIP,
+                    lat = g.LAT,
+                    lon = g.LON
+            FROM edge_geocode g
+            WHERE ipeds_count.unitid = g.UNITID;
+            """
+        execute_sql(db_path, sql)
+
+        # delete any rows with no geo data
+        sql = """
+            --sql
+            delete
+            from ipeds_count
+            where name is null;
+            """
+        execute_sql(db_path, sql)
+
+        logger.info("creating final table")
+        sql = """
+            --sql
+            CREATE TABLE viz_data AS
+            SELECT
+                institution as opeid,
+                grad_count,
+                date_release,
+                degree_level,
+                name,
+                st,
+                lat,
+                lon
+            FROM ipeds_count;
+            """
+        execute_sql(db_path, sql)
+
     logger.info("done.")
 
 
