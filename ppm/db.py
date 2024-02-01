@@ -64,7 +64,7 @@ def init_db_table(db_path: str, table_name: str, columns: list):
     """
 
     # Check if database exists, if not, create it
-    if not os.path.isfile(db_path):
+    try:
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         column_str = " TEXT, ".join(columns)
@@ -72,6 +72,7 @@ def init_db_table(db_path: str, table_name: str, columns: list):
         conn.commit()
         conn.close()
         logger.debug(f"created db at {db_path}")
-    else:
-        logger.debug(f"db at {db_path} already exists")
-        truncate_table(db_path, table_name)
+    except sqlite3.OperationalError:
+        logger.error(f"db({db_path}) and table({table_name}) already exists")
+        logger.info("try running with the -f/--force flag to recreate the database")
+        raise SystemExit(1)

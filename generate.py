@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import re
 import argparse
 import logging
@@ -42,9 +43,16 @@ def parse_args():
     parser.add_argument(
         "-d",
         "--database",
-        help="sqlite database location",
+        help="sqlite intermediate database location",
         required=False,
         type=str,
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        help="delete and recreate the intermediate database",
+        action="store_true",
+        required=False,
     )
 
     return parser.parse_args()
@@ -53,6 +61,11 @@ def parse_args():
 def main():
     inputs = parse_args()
     logging.basicConfig(level=get_log_level(inputs.loglevel), format=LOG_FORMAT)
+
+    # if the database exists and the force flag is set, delete it
+    if inputs.force and inputs.database:
+        if os.path.isfile(inputs.database):
+            os.remove(inputs.database)
 
     logger.info("Creating the pseo-partners-map data")
 
