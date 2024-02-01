@@ -282,15 +282,24 @@ def main():
 
         logger.info(f"loading opeid to unitid crosswalk into {db_path}")
         header_row = get_header_row(CROSSWALK_CSV)
-        init_db_table(db_path, "xwalk", header_row)
-        insert_csv_into_db(CROSSWALK_CSV, db_path, "xwalk")
+        init_db_table(db_path, "xwalk_raw", header_row)
+        insert_csv_into_db(CROSSWALK_CSV, db_path, "xwalk_raw")
 
         # 5 =  no match was made between the OPIED and an IPEDS UNITID
         sql = """
             --sql
             DELETE
-            FROM xwalk
+            FROM xwalk_raw
             WHERE source = '5';
+            """
+        execute_sql(db_path, sql)
+
+        # cleanup what we don't need
+        sql = """
+            --sql
+            CREATE TABLE xwalk AS
+            SELECT opeid, ipedsmatch as unitid
+            FROM xwalk_raw;
             """
         execute_sql(db_path, sql)
 
