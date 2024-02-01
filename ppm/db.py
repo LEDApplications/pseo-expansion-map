@@ -1,12 +1,14 @@
-import os
 import csv
 import sqlite3
 import logging
+from .sql import execute_sql
 
 logger = logging.getLogger(__name__)
 
 
-def insert_csv_into_db(csv_file_path: str, db_path: str, table_name: str, vintage: str):
+def insert_csv_into_db_w_vintage(
+    csv_file_path: str, db_path: str, table_name: str, vintage: str
+):
     """Insert a csv file into a sqlite db with a specific vintage column
 
     Args:
@@ -43,11 +45,7 @@ def get_header_row(csv_file_path: str):
 
 
 def truncate_table(db_path: str, table_name: str):
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    cur.execute(f"DELETE FROM {table_name}")
-    conn.commit()
-    conn.close()
+    execute_sql(f"DELETE FROM {table_name}")
     logger.debug(f"truncated table {table_name} in {db_path}")
 
 
@@ -65,12 +63,8 @@ def init_db_table(db_path: str, table_name: str, columns: list):
 
     # Check if database exists, if not, create it
     try:
-        conn = sqlite3.connect(db_path)
-        cur = conn.cursor()
         column_str = " TEXT, ".join(columns)
-        cur.execute(f"CREATE TABLE {table_name} ({column_str})")
-        conn.commit()
-        conn.close()
+        execute_sql(f"CREATE TABLE {table_name} ({column_str})")
         logger.debug(f"created db at {db_path}")
     except sqlite3.OperationalError:
         logger.error(f"db({db_path}) and table({table_name}) already exists")
