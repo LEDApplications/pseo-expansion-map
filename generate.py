@@ -28,6 +28,10 @@ ALL_FILE_URL_FORMAT = (
 )
 EDGE_GEOCODE_CSV = "./data/EDGE_GEOCODE_POSTSECSCH_2223.csv"
 CROSSWALK_CSV = "./data/xwalks_opeid_ipeds_2020.csv"
+INITIAL_CSV_URL = (
+    "https://lehd.ces.census.gov/data/pseo/earlier_releases/graduate_earnings_all.csv"
+)
+INITIAL_CSV_VINTAGE = "R2018Q3"
 
 
 def parse_args():
@@ -66,7 +70,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def execute_db_sql(db_path: str):
+def format_db_data(db_path: str):
     # trim down only what's needed, sum the grad counts
     sql = """
         --sql
@@ -216,6 +220,103 @@ def execute_db_sql(db_path: str):
     execute_sql(db_path, sql)
 
 
+def join_geocode_db_data(db_path: str):
+    sql = """
+        --sql
+        alter table ipeds_count
+            add column name text;
+        """
+    execute_sql(db_path, sql)
+
+    sql = """
+        --sql
+        alter table ipeds_count
+            add column st text;
+        """
+    execute_sql(db_path, sql)
+
+    sql = """
+        --sql
+        alter table ipeds_count
+            add column lat text;
+        """
+    execute_sql(db_path, sql)
+
+    sql = """
+        --sql
+        alter table ipeds_count
+            add column lon text;
+        """
+    execute_sql(db_path, sql)
+
+    sql = """
+        --sql
+        update ipeds_count
+            set name = g.NAME,
+                st = g.STFIP,
+                lat = g.LAT,
+                lon = g.LON
+        FROM edge_geocode g
+        WHERE ipeds_count.unitid = g.UNITID;
+        """
+    execute_sql(db_path, sql)
+
+    # delete any rows with no geo data
+    sql = """
+        --sql
+        delete
+        from ipeds_count
+        where name is null;
+        """
+    execute_sql(db_path, sql)
+
+
+def crosswalk_db_data(db_path: str):
+    # 5 =  no match was made between the OPIED and an IPEDS UNITID
+    sql = """
+        --sql
+        DELETE
+        FROM xwalk_raw
+        WHERE source = '5';
+        """
+    execute_sql(db_path, sql)
+
+    # cleanup what we don't need
+    sql = """
+        --sql
+        CREATE TABLE xwalk AS
+        SELECT opeid, ipedsmatch as unitid
+        FROM xwalk_raw;
+        """
+    execute_sql(db_path, sql)
+
+    # add opeid to ipeds_count
+    sql = """
+        --sql
+        alter table ipeds_count
+            add column unitid text;
+        """
+    execute_sql(db_path, sql)
+
+    sql = """
+        --sql
+        update ipeds_count
+        set unitid = xwalk.unitid
+        from xwalk
+        where ipeds_count.institution = xwalk.OPEID;
+        """
+    execute_sql(db_path, sql)
+
+    # delete any rows with no crosswalk entry
+    sql = """
+        --sql
+        delete
+        from ipeds_count
+        where unitid is null;
+        """
+    execute_sql(db_path, sql)
+
+
 def main():
     inputs = parse_args()
     logging.basicConfig(level=get_log_level(inputs.loglevel), format=LOG_FORMAT)
@@ -273,7 +374,7 @@ def main():
             insert_csv_into_db_w_vintage(csv, db_path, "pseoe_public", vintage)
 
         logger.info(f"executing sql process")
-        execute_db_sql(db_path)
+        format_db_data(db_path)
 
         logger.info(f"loading geocode data into {db_path}")
         header_row = get_header_row(EDGE_GEOCODE_CSV)
@@ -285,100 +386,18 @@ def main():
         init_db_table(db_path, "xwalk_raw", header_row)
         insert_csv_into_db(CROSSWALK_CSV, db_path, "xwalk_raw")
 
-        # 5 =  no match was made between the OPIED and an IPEDS UNITID
-        sql = """
-            --sql
-            DELETE
-            FROM xwalk_raw
-            WHERE source = '5';
-            """
-        execute_sql(db_path, sql)
+        logger.info(f"loading initial release into {db_path}")
+        initial_file_name = f"graduate_earnings_all_{INITIAL_CSV_VINTAGE}.csv"
+        initial_csv = download_url_to_file(INITIAL_CSV_URL, temp_dir, initial_file_name)
+        header_row = get_header_row(initial_csv)
+        init_db_table(db_path, "initial_release", header_row)
+        insert_csv_into_db(initial_csv, db_path, "initial_release")
 
-        # cleanup what we don't need
-        sql = """
-            --sql
-            CREATE TABLE xwalk AS
-            SELECT opeid, ipedsmatch as unitid
-            FROM xwalk_raw;
-            """
-        execute_sql(db_path, sql)
-
-        logger.info("adding crosswalk ids")
-        # add opeid to ipeds_count
-        sql = """
-            --sql
-            alter table ipeds_count
-                add column unitid text;
-            """
-        execute_sql(db_path, sql)
-
-        sql = """
-            --sql
-            update ipeds_count
-            set unitid = xwalk.unitid
-            from xwalk
-            where ipeds_count.institution = xwalk.OPEID;
-            """
-        execute_sql(db_path, sql)
-
-        # delete any rows with no crosswalk entry
-        sql = """
-            --sql
-            delete
-            from ipeds_count
-            where unitid is null;
-            """
-        execute_sql(db_path, sql)
+        logger.info("processing opeid to unitid crosswalk")
+        crosswalk_db_data(db_path)
 
         logger.info("joining geocode data")
-        sql = """
-            --sql
-            alter table ipeds_count
-                add column name text;
-            """
-        execute_sql(db_path, sql)
-
-        sql = """
-            --sql
-            alter table ipeds_count
-                add column st text;
-            """
-        execute_sql(db_path, sql)
-
-        sql = """
-            --sql
-            alter table ipeds_count
-                add column lat text;
-            """
-        execute_sql(db_path, sql)
-
-        sql = """
-            --sql
-            alter table ipeds_count
-                add column lon text;
-            """
-        execute_sql(db_path, sql)
-
-        sql = """
-            --sql
-            update ipeds_count
-                set name = g.NAME,
-                    st = g.STFIP,
-                    lat = g.LAT,
-                    lon = g.LON
-            FROM edge_geocode g
-            WHERE ipeds_count.unitid = g.UNITID;
-            """
-        execute_sql(db_path, sql)
-
-        # delete any rows with no geo data
-        sql = """
-            --sql
-            delete
-            from ipeds_count
-            where name is null;
-            """
-        execute_sql(db_path, sql)
+        join_geocode_db_data(db_path)
 
         logger.info("creating final table")
         sql = """
@@ -396,6 +415,11 @@ def main():
             FROM ipeds_count;
             """
         execute_sql(db_path, sql)
+
+        # TODO missing initial release
+        # TODO do I need to collapse over all degree levels?
+        # TODO output csv file and load
+        # TODO tweak app to use degree level
 
     logger.info("done.")
 

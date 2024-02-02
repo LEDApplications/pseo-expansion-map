@@ -1,6 +1,6 @@
 # PSEO Partners Map
 
-Generate the data for the [PSEO Partners Map](https://observablehq.com/@jodyhoonstarr/pseo-expansion-2024-update)
+Generate the data for the [PSEO Expansion Map](https://observablehq.com/@jodyhoonstarr/pseo-expansion-2024-update)
 
 ## Generate Data
 
