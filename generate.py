@@ -17,6 +17,7 @@ from ppm.db import (
     init_db_table,
     insert_csv_into_db_w_vintage,
     insert_csv_into_db,
+    export_table_to_csv,
 )
 from ppm.sql import execute_sql
 
@@ -409,9 +410,28 @@ def main():
             """
         execute_sql(db_path, sql)
 
-        # TODO do I need to collapse over all degree levels?
-        # TODO output csv file and load
-        # TODO tweak app to use degree level
+        logger.info("aggregating 00 degree level margin")
+        sql = """
+            --sql
+            with degree_level_agg as (
+                select opeid,
+                       sum(grad_count) as grad_count,
+                       date_release,
+                       name,
+                       st,
+                       lat,
+                       lon
+                from viz_data
+                group by opeid, date_release, degree_level, name, st, lat, lon
+            )
+            insert into viz_data (opeid, grad_count, date_release, degree_level, name, st, lat, lon)
+            select opeid, grad_count, date_release, '00' as degree_level, name, st, lat, lon
+            from degree_level_agg;
+            """
+        execute_sql(db_path, sql)
+
+        logger.info("exporting to csv")
+        export_table_to_csv(db_path, "viz_data", "./viz_data.csv")
 
     logger.info("done.")
 

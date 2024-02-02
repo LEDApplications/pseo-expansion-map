@@ -102,3 +102,23 @@ def init_db_table(db_path: str, table_name: str, columns: list):
         logger.error(f"db({db_path}) and table({table_name}) already exists")
         logger.info("try running with the -f/--force flag to recreate the database")
         raise SystemExit(1)
+
+
+def export_table_to_csv(db_path: str, table_name: str, csv_file_path: str):
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    cur.execute(f"SELECT * FROM {table_name}")
+    rows = cur.fetchall()
+
+    column_names = [description[0] for description in cur.description]
+
+    # Write the data to a CSV file
+    with open(csv_file_path, "w", newline="") as csv_file:
+        writer = csv.writer(csv_file)
+        writer.writerow(column_names)  # write the header
+        writer.writerows(rows)  # write the data
+
+    conn.close()
+
+    logger.debug(f"Exported data from {table_name} to {csv_file_path}")
