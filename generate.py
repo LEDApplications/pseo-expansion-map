@@ -63,8 +63,22 @@ def parse_args():
         action="store_true",
         required=False,
     )
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="output csv file",
+        required=True,
+        type=csv_type,
+    )
 
     return parser.parse_args()
+
+
+def csv_type(string: str):
+    if string.lower().endswith(".csv"):
+        return string
+    else:
+        raise SystemExit(f"{string} is not a csv")
 
 
 def format_db_data(db_path: str):
@@ -426,10 +440,8 @@ def main():
             """
         execute_sql(db_path, sql)
 
-        logger.info("exporting to csv")
-        export_table_to_csv(db_path, "viz_data", "./viz_data.csv")
-
-    logger.info("done.")
+        export_table_to_csv(db_path, "viz_data", inputs.output)
+        logger.info(f"csv data saved to {inputs.output}")
 
 
 if __name__ == "__main__":
