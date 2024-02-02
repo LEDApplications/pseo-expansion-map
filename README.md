@@ -4,6 +4,18 @@ Generate the data for the [PSEO Expansion Map](https://observablehq.com/@jodyhoo
 
 > Disclaimer: The data generated here should not be used for analysis. It's cobbling together a few things to tell a story about the growth of the PSEO partnership.
 
+## Install deps
+
+This project uses [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
+
+```sh
+# install deps
+conda env create --file=environment.yaml
+
+# activate
+conda activate pseo-partners-map
+```
+
 ## Generate Data
 
 ```sh
