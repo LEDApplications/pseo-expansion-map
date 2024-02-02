@@ -432,7 +432,7 @@ def main():
                        lat,
                        lon
                 from viz_data
-                group by opeid, date_release, degree_level, name, st, lat, lon
+                group by opeid, date_release, name, st, lat, lon
             )
             insert into viz_data (opeid, grad_count, date_release, degree_level, name, st, lat, lon)
             select opeid, grad_count, date_release, '00' as degree_level, name, st, lat, lon
