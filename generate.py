@@ -386,13 +386,6 @@ def main():
         init_db_table(db_path, "xwalk_raw", header_row)
         insert_csv_into_db(CROSSWALK_CSV, db_path, "xwalk_raw")
 
-        logger.info(f"loading initial release into {db_path}")
-        initial_file_name = f"graduate_earnings_all_{INITIAL_CSV_VINTAGE}.csv"
-        initial_csv = download_url_to_file(INITIAL_CSV_URL, temp_dir, initial_file_name)
-        header_row = get_header_row(initial_csv)
-        init_db_table(db_path, "initial_release_raw", header_row)
-        insert_csv_into_db(initial_csv, db_path, "initial_release_raw")
-
         logger.info("processing opeid to unitid crosswalk")
         crosswalk_db_data(db_path)
 
@@ -416,7 +409,6 @@ def main():
             """
         execute_sql(db_path, sql)
 
-        # TODO missing initial release
         # TODO do I need to collapse over all degree levels?
         # TODO output csv file and load
         # TODO tweak app to use degree level
