@@ -29,10 +29,6 @@ ALL_FILE_URL_FORMAT = (
 )
 EDGE_GEOCODE_CSV = "./data/EDGE_GEOCODE_POSTSECSCH_2223.csv"
 CROSSWALK_CSV = "./data/xwalks_opeid_ipeds_2020.csv"
-INITIAL_CSV_URL = (
-    "https://lehd.ces.census.gov/data/pseo/earlier_releases/graduate_earnings_all.csv"
-)
-INITIAL_CSV_VINTAGE = "R2018Q3"
 
 
 def parse_args():
