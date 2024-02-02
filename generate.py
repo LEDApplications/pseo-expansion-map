@@ -390,8 +390,8 @@ def main():
         initial_file_name = f"graduate_earnings_all_{INITIAL_CSV_VINTAGE}.csv"
         initial_csv = download_url_to_file(INITIAL_CSV_URL, temp_dir, initial_file_name)
         header_row = get_header_row(initial_csv)
-        init_db_table(db_path, "initial_release", header_row)
-        insert_csv_into_db(initial_csv, db_path, "initial_release")
+        init_db_table(db_path, "initial_release_raw", header_row)
+        insert_csv_into_db(initial_csv, db_path, "initial_release_raw")
 
         logger.info("processing opeid to unitid crosswalk")
         crosswalk_db_data(db_path)
