@@ -4,6 +4,10 @@ Generate the data for the [PSEO Expansion Map](https://observablehq.com/@jodyhoo
 
 > Disclaimer: The data generated here should not be used for analysis. It's cobbling together a few things to tell a story about the growth of the PSEO partnership.
 
+## Convert web map to image
+
+The web app is nice but sometimes you just need an image for a presentation. [gifcap.dev](https://gifcap.dev/) works well for recording the web map to a gif file.
+
 ## Install deps
 
 This project uses [conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html).
