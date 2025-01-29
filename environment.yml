@@ -1,28 +1,40 @@
 name: pseo-partners-map
 channels:
+  - anaconda
   - conda-forge
   - defaults
 dependencies:
-  - _libgcc_mutex=0.1
-  - _openmp_mutex=4.5
-  - bzip2=1.0.8
-  - ca-certificates=2023.11.17
-  - ld_impl_linux-64=2.40
-  - libffi=3.4.2
-  - libgcc-ng=13.2.0
-  - libgomp=13.2.0
-  - libnsl=2.0.1
-  - libsqlite=3.44.2
-  - libuuid=2.38.1
-  - libxcrypt=4.4.36
-  - libzlib=1.2.13
-  - ncurses=6.4
-  - openssl=3.2.1
-  - pip=23.3.2
-  - python=3.9.18
-  - readline=8.2
-  - setuptools=69.0.3
-  - tk=8.6.13
-  - tzdata=2023d
-  - wheel=0.42.0
-  - xz=5.2.6
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=2_gnu
+  - beautifulsoup4=4.12.3=py39h06a4308_0
+  - brotli-python=1.0.9=py39h6a678d5_9
+  - bs4=4.12.3=py39hd3eb1b0_0
+  - bzip2=1.0.8=h4bc722e_7
+  - ca-certificates=2024.12.31=h06a4308_0
+  - certifi=2024.12.14=py39h06a4308_0
+  - charset-normalizer=3.3.2=pyhd3eb1b0_0
+  - idna=3.7=py39h06a4308_0
+  - ld_impl_linux-64=2.40=hf3520f5_7
+  - libffi=3.4.2=h7f98852_5
+  - libgcc-ng=13.2.0=h77fa898_13
+  - libgomp=13.2.0=h77fa898_13
+  - libnsl=2.0.1=hd590300_0
+  - libsqlite=3.44.2=h2797004_0
+  - libstdcxx-ng=11.2.0=h1234567_1
+  - libuuid=2.38.1=h0b41bf4_0
+  - libxcrypt=4.4.36=hd590300_1
+  - libzlib=1.2.13=h4ab18f5_6
+  - ncurses=6.4.20240210=h59595ed_0
+  - openssl=3.2.1=h4ab18f5_2
+  - pip=23.3.2=pyhd8ed1ab_0
+  - pysocks=1.7.1=py39h06a4308_0
+  - python=3.9.18=h0755675_1_cpython
+  - readline=8.2=h8228510_1
+  - requests=2.32.3=py39h06a4308_1
+  - setuptools=69.0.3=pyhd8ed1ab_0
+  - soupsieve=2.5=py39h06a4308_0
+  - tk=8.6.13=noxft_h4845f30_101
+  - tzdata=2023d=h0c530f3_0
+  - urllib3=2.3.0=py39h06a4308_0
+  - wheel=0.42.0=pyhd8ed1ab_0
+  - xz=5.2.6=h166bdaf_0
